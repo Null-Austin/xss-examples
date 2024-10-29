@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XSS vulnerabilities</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a3d;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        a{
+            color: rgb(181, 181, 181);
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background-color: #2e2e52;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+        .list-box {
+            background-color: #3b3b5c;
+            border-radius: 10px;
+            padding: 15px;
+            width: 200px;
+        }
+        .list-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #4b4b72;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .list-item:hover {
+            background-color: #5a5a85;
+        }
+        .editor-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 600px;
+            background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
+            border-radius: 15px; /* Rounded corners */
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); /* Soft shadow for depth */
+            backdrop-filter: blur(10px); /* Blurry effect behind the box */
+            padding: 20px; /* Add padding for spacing */
+            border-radius: 5px;
+        }
+
+        #editorContainer {
+            width: 100%;
+            height: 150px;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #6b6bbd;
+            color: #ffffff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #7a7acd;
+        }
+        .output {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #32324a;
+            border-radius: 5px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Box: List of Items -->
+        <div class="list-box">
+            <h3>Items List</h3>
+            <div id="listContainer"></div>
+        </div>
+        
+        <!-- Right Box: Editor and Display -->
+        <div class="editor-box">
+            <h2>Enter Text</h2>
+            <div id="editorContainer"></div>
+            <button onclick="displayInput()">Display</button>
+            <div class="output" id="displayText">Your output will appear here.</div>
+        </div>
+    </div>
+
+    <!-- Monaco Editor CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.js"></script>
+    
+    <script>
+        // List with example items that include HTML code
+        const list = [
+            { name: 'Button Example', content: '<button onclick="alert(\'XSS\')">Click me</button>' },
+            { name: 'Image Example', content: '<img src="invalid.jpg" onerror="alert(\'XSS via Image\')">' },
+            { name: 'Link Example', content: '<a href="javascript:alert(\'XSS via Link\')">Click here</a>' }
+        ];
+
+        // Initialize Monaco Editor
+        let editor;
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            editor = monaco.editor.create(document.getElementById('editorContainer'), {
+                value: "<!-- Type HTML code here -->",
+                language: "html",
+                theme: "vs-light",  // Change to a light theme
+                automaticLayout: true,
+                minimap: { enabled: false }  // Disable the minimap
+            });
+        });
+
+
+        // Function to display input with XSS vulnerability
+        function displayInput() {
+            const userInput = editor.getValue();
+            document.getElementById("displayText").innerHTML = userInput;
+        }
+
+        // Function to render the list of items with clickable items
+        function renderList() {
+            const listContainer = document.getElementById("listContainer");
+            listContainer.innerHTML = "";  // Clear previous items
+
+            list.forEach(item => {
+                const listItem = document.createElement("div");
+                listItem.className = "list-item";
+                listItem.innerText = item.name;
+                listItem.onclick = () => {
+                    editor.setValue(item.content);
+                };
+                listContainer.appendChild(listItem);
+            });
+        }
+
+        // Initial render of the list
+        renderList();
+    </script>
+</body>
+</html>
