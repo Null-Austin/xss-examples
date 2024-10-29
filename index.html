@@ -108,8 +108,11 @@
         // List with example items that include HTML code
         const list = [
             { name: 'Button Example', content: '<button onclick="alert(\'XSS\')">Click me</button>' },
-            { name: 'Image Example', content: '<img src="invalid.jpg" onerror="alert(\'XSS via Image\')">' },
-            { name: 'Link Example', content: '<a href="javascript:alert(\'XSS via Link\')">Click here</a>' }
+            { name: 'Error Image', content: '<img src="invalid.jpg" onerror="alert(\'XSS via Image\')">' },
+            { name: 'Link Example', content: '<a href="javascript:alert(\'XSS via Link\')">Click here</a>' },
+            { name: 'hover example', content: '<p onmouseover=alert(1)>You should highlight me!</p>'},
+            { name: 'An iframe', content: '<iframe/srcdoc="<script>alert(1)<\/script>">'} //Thanks to terjanq
+            //{ name: '', content: ''}
         ];
 
         // Initialize Monaco Editor
